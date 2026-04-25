@@ -14,7 +14,7 @@ echo "🔍 Enabling Hubble (observability)..."
 cilium hubble enable --ui
 
 echo "⏳ Waiting for Cilium to be ready..."
-cilium status --wait
+cilium status --wait | egrep -o 'Cilium: .*$'
 
 echo "🐳 Loading images into kind..."
 kind load docker-image frontend:latest --name $CLUSTER_NAME
