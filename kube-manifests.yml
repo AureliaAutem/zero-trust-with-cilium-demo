@@ -1,0 +1,157 @@
+# =========================
+# FRONTEND (Website app)
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: frontend
+  template:
+    metadata:
+      labels:
+        component: frontend
+        app: website
+    spec:
+      containers:
+        - name: frontend
+          image: frontend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    component: frontend
+  ports:
+    - port: 3000
+      targetPort: 3000
+
+# =========================
+# BACKEND (Website app)
+# =========================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: backend
+  template:
+    metadata:
+      labels:
+        component: backend
+        app: website
+    spec:
+      containers:
+        - name: backend
+          image: backend:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    component: backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+
+# =========================
+# CLIENT API (App 2)
+# =========================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clientapi
+  labels:
+    app: clientapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: clientapi
+  template:
+    metadata:
+      labels:
+        component: clientapi
+        app: clientapi
+    spec:
+      containers:
+        - name: clientapi
+          image: clientapi:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_HOST
+              value: http://clientdb:9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clientapi
+spec:
+  selector:
+    component: clientapi
+  ports:
+    - port: 8000
+      targetPort: 8000
+
+# =========================
+# CLIENT DB (internal)
+# =========================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clientdb
+  labels:
+    app: clientapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: clientdb
+  template:
+    metadata:
+      labels:
+        component: clientdb
+        app: clientapi
+    spec:
+      containers:
+        - name: clientdb
+          image: clientdb:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clientdb
+spec:
+  selector:
+    component: clientdb
+  ports:
+    - port: 9000
+      targetPort: 9000

@@ -1,0 +1,60 @@
+# =========================================
+# 1. BACKEND POLICY
+# Allow frontend → backend (all traffic)
+# =========================================
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: backend-policy
+spec:
+  endpointSelector:
+    matchLabels:
+      component: backend
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            component: frontend
+
+---
+# =========================================
+# 2. CLIENTDB POLICY
+# Allow clientapi → clientdb (all traffic)
+# =========================================
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: clientdb-policy
+spec:
+  endpointSelector:
+    matchLabels:
+      component: clientdb
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            component: clientapi
+
+---
+# =========================================
+# 3. CLIENTAPI POLICY
+# Allow frontend → clientapi ONLY /login
+# =========================================
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: clientapi-policy
+spec:
+  endpointSelector:
+    matchLabels:
+      component: clientapi
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            component: frontend
+      toPorts:
+        - ports:
+            - port: "8000"
+              protocol: TCP
+          rules:
+            http:
+              - method: "GET"
+                path: "/login"
